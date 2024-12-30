@@ -1,7 +1,6 @@
 import streamlit as st
 import yt_dlp
 import shutil
-import streamlit as st
 
 def check_ffmpeg():
     """Check if ffmpeg is installed and accessible."""
@@ -13,11 +12,8 @@ def check_ffmpeg():
         return False
     return True
 
-# Call this function before running any video download logic
-if not check_ffmpeg():
-    st.stop()
-
 def fetch_video_info(url):
+    """Fetch video information from the provided URL."""
     ydl_opts = {}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -28,6 +24,7 @@ def fetch_video_info(url):
         return None
 
 def download_video(url, resolution):
+    """Download the video with the selected resolution."""
     ydl_opts = {
         'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
         'outtmpl': '%(title)s.%(ext)s',
@@ -42,6 +39,10 @@ def download_video(url, resolution):
 
 def main():
     st.title("YouTube Video Downloader with yt-dlp")
+
+    # Check for FFmpeg
+    if not check_ffmpeg():
+        st.stop()
 
     # Input for YouTube URL
     url = st.text_input("Enter the YouTube video URL:")

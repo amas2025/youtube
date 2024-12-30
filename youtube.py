@@ -1,9 +1,14 @@
 import streamlit as st
+
+# Enhanced error handling for pytube import
 try:
     from pytube import YouTube
-except ModuleNotFoundError:
-    st.error("The 'pytube' module is not installed. Please install it using 'pip install pytube'.")
-    raise
+except ImportError:
+    st.error(
+        "The 'pytube' module is not installed. Please install it by running the following command in your terminal:\n\n"
+        "`pip install pytube`"
+    )
+    raise SystemExit
 
 def main():
     st.title("YouTube Video Downloader")
@@ -21,6 +26,11 @@ def main():
             # Select resolution
             streams = yt.streams.filter(progressive=True, file_extension='mp4')
             resolution_options = [stream.resolution for stream in streams]
+
+            if not resolution_options:
+                st.error("No downloadable resolutions are available for this video.")
+                return
+
             selected_resolution = st.selectbox("Select a resolution:", resolution_options)
 
             if st.button("Download"):
@@ -28,7 +38,7 @@ def main():
                 if stream:
                     # Download video
                     stream.download()
-                    st.success("Video downloaded successfully!")
+                    st.success(f"Video downloaded successfully! Saved as: {stream.default_filename}")
                 else:
                     st.error("The selected resolution is not available.")
         except Exception as e:

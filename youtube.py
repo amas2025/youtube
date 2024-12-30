@@ -27,6 +27,13 @@ def fetch_video_info(url):
 
 def download_video_to_pc(url, resolution, download_folder):
     """Download the video with the selected resolution to the user's computer."""
+    # Ensure the folder exists
+    if not os.path.exists(download_folder):
+        os.makedirs(download_folder, exist_ok=True)
+
+    # Log the folder path for debugging
+    st.write(f"Saving video to: {download_folder}")
+
     ydl_opts = {
         'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
         'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),  # Save to user-specified folder
@@ -82,10 +89,6 @@ def main():
             selected_resolution = st.selectbox("Select a resolution:", resolutions)
 
             if st.button("Download"):
-                # Ensure the folder exists
-                if not os.path.exists(download_folder):
-                    os.makedirs(download_folder)
-                
                 if download_video_to_pc(url, selected_resolution, download_folder):
                     st.success(f"Video downloaded successfully to {download_folder}!")
 

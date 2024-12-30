@@ -60,7 +60,7 @@ def main():
         video_info = fetch_video_info(url)
         if video_info:
             st.write(f"### {video_info['title']}")
-            st.image(video_info['thumbnail'], use_column_width=True)
+            st.image(video_info['thumbnail'], use_container_width=True)
 
             # Get available resolutions
             resolutions = list(

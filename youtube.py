@@ -25,11 +25,11 @@ def fetch_video_info(url):
         st.error(f"Failed to fetch video info: {e}")
         return None
 
-def download_video(url, resolution, download_path):
-    """Download the video with the selected resolution to a specific path."""
+def download_video_to_pc(url, resolution):
+    """Download the video with the selected resolution to the user's computer."""
     ydl_opts = {
         'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
-        'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
+        'outtmpl': os.path.join(os.getcwd(), '%(title)s.%(ext)s'),  # Save to current working directory
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -56,12 +56,7 @@ def main():
     # Input for YouTube URL
     url = st.text_input("Enter the YouTube video URL:")
 
-    # Input for download location
-    download_path = st.text_input(
-        "Enter the download folder path (absolute path):", value=str(Path.home())
-    )
-
-    if url and download_path:
+    if url:
         video_info = fetch_video_info(url)
         if video_info:
             st.write(f"### {video_info['title']}")
@@ -80,11 +75,8 @@ def main():
             selected_resolution = st.selectbox("Select a resolution:", resolutions)
 
             if st.button("Download"):
-                # Ensure the download path exists
-                os.makedirs(download_path, exist_ok=True)
-
-                if download_video(url, selected_resolution, download_path):
-                    st.success(f"Video downloaded successfully to {download_path}!")
+                if download_video_to_pc(url, selected_resolution):
+                    st.success("Video downloaded successfully to your current working directory!")
 
 if __name__ == "__main__":
     main()

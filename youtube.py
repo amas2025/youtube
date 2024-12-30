@@ -3,8 +3,6 @@ import yt_dlp
 import shutil
 import os
 from pathlib import Path
-from tkinter import Tk
-from tkinter.filedialog import askdirectory
 
 def check_ffmpeg():
     """Check if ffmpeg is installed and accessible."""
@@ -41,14 +39,6 @@ def download_video_to_pc(url, resolution, download_folder):
         st.error(f"Failed to download video: {e}")
         return False
 
-def pick_folder():
-    """Open a folder picker dialog and return the selected folder."""
-    root = Tk()
-    root.withdraw()  # Hide the main tkinter window
-    folder_selected = askdirectory(title="Select Folder to Save Video")
-    root.destroy()
-    return folder_selected
-
 def main():
     st.title("YouTube Video Downloader with yt-dlp")
 
@@ -66,7 +56,14 @@ def main():
     # Input for YouTube URL
     url = st.text_input("Enter the YouTube video URL:")
 
-    if url:
+    # Input for download folder
+    default_folder = str(Path.home())
+    download_folder = st.text_input(
+        "Enter the folder path where the video should be saved:",
+        value=default_folder
+    )
+
+    if url and download_folder:
         video_info = fetch_video_info(url)
         if video_info:
             st.write(f"### {video_info['title']}")
@@ -85,12 +82,12 @@ def main():
             selected_resolution = st.selectbox("Select a resolution:", resolutions)
 
             if st.button("Download"):
-                download_folder = pick_folder()  # Open folder picker dialog
-                if download_folder:
-                    if download_video_to_pc(url, selected_resolution, download_folder):
-                        st.success(f"Video downloaded successfully to {download_folder}!")
-                else:
-                    st.error("No folder selected. Please select a folder to save the video.")
+                # Ensure the folder exists
+                if not os.path.exists(download_folder):
+                    os.makedirs(download_folder)
+                
+                if download_video_to_pc(url, selected_resolution, download_folder):
+                    st.success(f"Video downloaded successfully to {download_folder}!")
 
 if __name__ == "__main__":
     main()

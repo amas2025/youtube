@@ -3,6 +3,8 @@ import yt_dlp
 import shutil
 import os
 from pathlib import Path
+from tkinter import Tk
+from tkinter.filedialog import askdirectory
 
 def check_ffmpeg():
     """Check if ffmpeg is installed and accessible."""
@@ -25,11 +27,11 @@ def fetch_video_info(url):
         st.error(f"Failed to fetch video info: {e}")
         return None
 
-def download_video_to_pc(url, resolution):
+def download_video_to_pc(url, resolution, download_folder):
     """Download the video with the selected resolution to the user's computer."""
     ydl_opts = {
         'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
-        'outtmpl': os.path.join(os.getcwd(), '%(title)s.%(ext)s'),  # Save to current working directory
+        'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),  # Save to user-specified folder
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -38,6 +40,14 @@ def download_video_to_pc(url, resolution):
     except Exception as e:
         st.error(f"Failed to download video: {e}")
         return False
+
+def pick_folder():
+    """Open a folder picker dialog and return the selected folder."""
+    root = Tk()
+    root.withdraw()  # Hide the main tkinter window
+    folder_selected = askdirectory(title="Select Folder to Save Video")
+    root.destroy()
+    return folder_selected
 
 def main():
     st.title("YouTube Video Downloader with yt-dlp")
@@ -75,8 +85,12 @@ def main():
             selected_resolution = st.selectbox("Select a resolution:", resolutions)
 
             if st.button("Download"):
-                if download_video_to_pc(url, selected_resolution):
-                    st.success("Video downloaded successfully to your current working directory!")
+                download_folder = pick_folder()  # Open folder picker dialog
+                if download_folder:
+                    if download_video_to_pc(url, selected_resolution, download_folder):
+                        st.success(f"Video downloaded successfully to {download_folder}!")
+                else:
+                    st.error("No folder selected. Please select a folder to save the video.")
 
 if __name__ == "__main__":
     main()

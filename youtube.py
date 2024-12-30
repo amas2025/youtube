@@ -29,18 +29,26 @@ def download_video_to_pc(url, resolution, download_folder):
     """Download the video with the selected resolution to the user's computer."""
     # Ensure the folder exists
     if not os.path.exists(download_folder):
-        os.makedirs(download_folder, exist_ok=True)
+        try:
+            os.makedirs(download_folder, exist_ok=True)
+            st.write(f"Folder created: {download_folder}")
+        except Exception as e:
+            st.error(f"Could not create folder: {e}")
+            return False
 
     # Log the folder path for debugging
     st.write(f"Saving video to: {download_folder}")
 
+    # Configure yt_dlp options
     ydl_opts = {
         'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
         'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),  # Save to user-specified folder
+        'sanitize': True,  # Sanitize file names
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
+            st.write(f"Download completed: {download_folder}")
             return True
     except Exception as e:
         st.error(f"Failed to download video: {e}")

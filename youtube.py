@@ -1,40 +1,56 @@
 import streamlit as st
-from pytube import YouTube
+import yt_dlp
+
+def fetch_video_info(url):
+    ydl_opts = {}
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return info
+    except Exception as e:
+        st.error(f"Failed to fetch video info: {e}")
+        return None
+
+def download_video(url, resolution):
+    ydl_opts = {
+        'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
+        'outtmpl': '%(title)s.%(ext)s',
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+            return True
+    except Exception as e:
+        st.error(f"Failed to download video: {e}")
+        return False
 
 def main():
-    st.title("YouTube Video Downloader")
+    st.title("YouTube Video Downloader with yt-dlp")
 
     # Input for YouTube URL
     url = st.text_input("Enter the YouTube video URL:")
 
     if url:
-        try:
-            # Fetch video details
-            yt = YouTube(url)
-            st.write(f"### {yt.title}")
-            st.image(yt.thumbnail_url, use_column_width=True)
+        video_info = fetch_video_info(url)
+        if video_info:
+            st.write(f"### {video_info['title']}")
+            st.image(video_info['thumbnail'], use_column_width=True)
 
-            # Select resolution
-            streams = yt.streams.filter(progressive=True, file_extension='mp4')
-            resolution_options = [stream.resolution for stream in streams]
+            # Get available resolutions
+            resolutions = list(
+                set(
+                    f"{f['height']}"
+                    for f in video_info['formats']
+                    if f.get('height') and f.get('vcodec') != 'none'
+                )
+            )
+            resolutions.sort(key=int)
 
-            if not resolution_options:
-                st.error("No downloadable resolutions are available for this video.")
-                return
-
-            selected_resolution = st.selectbox("Select a resolution:", resolution_options)
+            selected_resolution = st.selectbox("Select a resolution:", resolutions)
 
             if st.button("Download"):
-                stream = streams.filter(res=selected_resolution).first()
-                if stream:
-                    # Download video
-                    stream.download()
-                    st.success(f"Video downloaded successfully! Saved as: {stream.default_filename}")
-                else:
-                    st.error("The selected resolution is not available.")
-        except Exception as e:
-            st.error(f"An error occurred while processing the video. Please check the URL or try again later.")
-            st.error(f"Details: {e}")
+                if download_video(url, selected_resolution):
+                    st.success("Video downloaded successfully!")
 
 if __name__ == "__main__":
     main()

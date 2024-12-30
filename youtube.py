@@ -1,14 +1,5 @@
 import streamlit as st
-import subprocess
-import sys
-
-# Ensure pytube is installed
-try:
-    from pytube import YouTube
-except ImportError:
-    st.warning("'pytube' is not installed. Installing now...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pytube"])
-    from pytube import YouTube
+from pytube import YouTube
 
 def main():
     st.title("YouTube Video Downloader")
@@ -42,7 +33,8 @@ def main():
                 else:
                     st.error("The selected resolution is not available.")
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"An error occurred while processing the video. Please check the URL or try again later.")
+            st.error(f"Details: {e}")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,21 @@
 import streamlit as st
 import yt_dlp
+import shutil
+import streamlit as st
+
+def check_ffmpeg():
+    """Check if ffmpeg is installed and accessible."""
+    if not shutil.which("ffmpeg"):
+        st.error(
+            "FFmpeg is not installed or not accessible. Please install it and ensure it's added to your PATH.\n"
+            "For Streamlit Cloud, add `imageio[ffmpeg]` to your requirements.txt."
+        )
+        return False
+    return True
+
+# Call this function before running any video download logic
+if not check_ffmpeg():
+    st.stop()
 
 def fetch_video_info(url):
     ydl_opts = {}

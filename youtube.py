@@ -1,14 +1,14 @@
 import streamlit as st
+import subprocess
+import sys
 
-# Enhanced error handling for pytube import
+# Ensure pytube is installed
 try:
     from pytube import YouTube
 except ImportError:
-    st.error(
-        "The 'pytube' module is not installed. Please install it by running the following command in your terminal:\n\n"
-        "`pip install pytube`"
-    )
-    raise SystemExit
+    st.warning("'pytube' is not installed. Installing now...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pytube"])
+    from pytube import YouTube
 
 def main():
     st.title("YouTube Video Downloader")

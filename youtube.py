@@ -1,5 +1,9 @@
 import streamlit as st
-from pytube import YouTube
+try:
+    from pytube import YouTube
+except ModuleNotFoundError:
+    st.error("The 'pytube' module is not installed. Please install it using 'pip install pytube'.")
+    raise
 
 def main():
     st.title("YouTube Video Downloader")

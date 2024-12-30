@@ -1,6 +1,8 @@
 import streamlit as st
 import yt_dlp
 import shutil
+import os
+from pathlib import Path
 
 def check_ffmpeg():
     """Check if ffmpeg is installed and accessible."""
@@ -23,11 +25,11 @@ def fetch_video_info(url):
         st.error(f"Failed to fetch video info: {e}")
         return None
 
-def download_video(url, resolution):
-    """Download the video with the selected resolution."""
+def download_video(url, resolution, download_path):
+    """Download the video with the selected resolution to a specific path."""
     ydl_opts = {
         'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]',
-        'outtmpl': '%(title)s.%(ext)s',
+        'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -54,7 +56,12 @@ def main():
     # Input for YouTube URL
     url = st.text_input("Enter the YouTube video URL:")
 
-    if url:
+    # Input for download location
+    download_path = st.text_input(
+        "Enter the download folder path (absolute path):", value=str(Path.home())
+    )
+
+    if url and download_path:
         video_info = fetch_video_info(url)
         if video_info:
             st.write(f"### {video_info['title']}")
@@ -73,8 +80,11 @@ def main():
             selected_resolution = st.selectbox("Select a resolution:", resolutions)
 
             if st.button("Download"):
-                if download_video(url, selected_resolution):
-                    st.success("Video downloaded successfully!")
+                # Ensure the download path exists
+                os.makedirs(download_path, exist_ok=True)
+
+                if download_video(url, selected_resolution, download_path):
+                    st.success(f"Video downloaded successfully to {download_path}!")
 
 if __name__ == "__main__":
     main()

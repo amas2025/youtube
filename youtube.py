@@ -7,7 +7,7 @@ def check_ffmpeg():
     if not shutil.which("ffmpeg"):
         st.error(
             "FFmpeg is not installed or not accessible. Please install it and ensure it's added to your PATH.\n"
-            "For Streamlit Cloud, add `imageio[ffmpeg]` to your requirements.txt."
+            "For Streamlit Cloud, add `imageio[ffmpeg]` to your requirements.txt and `ffmpeg` to your packages.txt."
         )
         return False
     return True
@@ -43,6 +43,13 @@ def main():
     # Check for FFmpeg
     if not check_ffmpeg():
         st.stop()
+
+    # Verify FFmpeg installation
+    if not shutil.which("ffmpeg"):
+        st.error("FFmpeg is not accessible. Please ensure it is properly installed and configured.")
+        return
+    else:
+        st.success("FFmpeg is successfully installed and accessible!")
 
     # Input for YouTube URL
     url = st.text_input("Enter the YouTube video URL:")
